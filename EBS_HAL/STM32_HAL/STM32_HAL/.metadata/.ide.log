@@ -1,0 +1,33 @@
+2023-03-12 14:31:49,453 [INFO] Activator:179 - 
+
+
+2023-03-12 14:31:49,453 [INFO] Activator:180 - !SESSION log4j initialized
+2023-03-12 14:31:51,425 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-03-12 14:31:51,427 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-03-12 14:31:51,428 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-03-12 14:32:06,073 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-03-12 14:32:06,081 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-03-12 14:32:06,083 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-09-27 23:01:01,300 [INFO] Activator:179 - 
+
+
+2023-09-27 23:01:01,308 [INFO] Activator:180 - !SESSION log4j initialized
+2023-09-27 23:01:07,693 [ERROR] ConfigurationRetriever:140 - IOException on connection: Software caused connection abort: recv failed
+2023-09-27 23:01:07,701 [ERROR] ConfigurationRetriever:140 - IOException on connection: Software caused connection abort: recv failed
+2023-09-27 23:01:07,707 [ERROR] ConfigurationRetriever:140 - IOException on connection: Software caused connection abort: recv failed
+2023-09-27 23:01:31,973 [ERROR] LogOutputStream:74 - [STDERR_REDIRECT] SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+2023-09-27 23:01:31,973 [ERROR] LogOutputStream:74 - [STDERR_REDIRECT] SLF4J: Defaulting to no-operation (NOP) logger implementation
+2023-09-27 23:01:31,973 [ERROR] LogOutputStream:74 - [STDERR_REDIRECT] SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+2023-09-27 23:02:44,515 [ERROR] ConfigurationRetriever:140 - IOException on connection: Remote host terminated the handshake
+2023-09-27 23:02:45,333 [ERROR] ConfigurationRetriever:140 - IOException on connection: Remote host terminated the handshake
+2023-09-27 23:02:45,538 [ERROR] ConfigurationRetriever:140 - IOException on connection: Remote host terminated the handshake
+2023-09-27 23:03:29,008 [INFO] Activator:179 - 
+
+
+2023-09-27 23:03:29,008 [INFO] Activator:180 - !SESSION log4j initialized
+2023-09-27 23:03:34,279 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-09-27 23:03:34,279 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-09-27 23:03:34,279 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-09-27 23:04:14,555 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-09-27 23:04:14,555 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com
+2023-09-27 23:04:14,555 [ERROR] ConfigurationRetriever:140 - IOException on connection: citools.st.com

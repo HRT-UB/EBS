@@ -1,0 +1,13 @@
+Change Component Designator: OldDesignator=LED2 NewDesignator=LED3
+Change Component Designator: OldDesignator=LED3 NewDesignator=LED2
+Change Net Name : Old Net Name=NetLED2_1 New Net Name=NetLED3_1
+Change Net Name : Old Net Name=NetLED3_1 New Net Name=NetLED2_1
+Added Member To Class: ClassName=ControlBoard Member=Component D3 SS14
+Added Member To Class: ClassName=ControlBoard Member=Component D4 SS14
+Added Member To Class: ClassName=ControlBoard Member=Component J3 KF2EDGK-2P
+Added Member To Class: ClassName=ControlBoard Member=Component J4 TLP181
+Added Member To Class: ClassName=ControlBoard Member=Component J5 KF2EDGK-2P
+Added Member To Class: ClassName=ControlBoard Member=Component R2 1K
+Added Member To Class: ClassName=ControlBoard Member=Component R8 30R
+Added Member To Class: ClassName=ControlBoard Member=Component R9 1K
+Added Member To Class: ClassName=ControlBoard Member=Component R11 10K
