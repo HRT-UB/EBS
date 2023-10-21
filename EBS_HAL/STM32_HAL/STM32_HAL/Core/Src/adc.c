@@ -205,9 +205,12 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
-uint32_t get_bar(uint32_t value, uint32_t flag) { // 0.01bar flag=0 air, flag=1 oil
-	if (!flag)
+uint32_t get_bar(uint32_t value, uint32_t flag) { // 0.01bar flag=0 air, flag=1 oil_F flag=2 oil_B
+	if (flag == 0)
 		return (uint32_t)(value * 202 / 819);
+	else if (flag == 1) {
+		return (value * 1375 / 819) > 625 ?  (value * 1375 / 819) - 625: 0;
+	}
 	else
 		return (uint32_t)(value * 1100 / 819);
 }
@@ -225,8 +228,8 @@ void Bplosefun(void) {
 	else if (lose_cnt[3] != 0) lose_cnt[3]--;
 	if (value[RF_OIL] <= _lose_oil && lose_cnt[4] < 10) lose_cnt[4]++;
 	else if (lose_cnt[4] != 0) lose_cnt[4]--;
-	if (value[LB_OIL] <= _lose_oil && lose_cnt[5] < 10) lose_cnt[5]++;
-	else if (lose_cnt[5] != 0) lose_cnt[5]--;
+//	if (value[LB_OIL] <= _lose_oil && lose_cnt[5] < 10) lose_cnt[5]++;
+//	else if (lose_cnt[5] != 0) lose_cnt[5]--;
 //	if (value[RB_OIL] <= _lose_oil && lose_cnt[6] < 10) lose_cnt[6]++;
 //	else if (lose_cnt[6] != 0) lose_cnt[6]--;
 	for (int16_t i = 1; i <= 6; ++i) {
@@ -245,8 +248,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 		bp[2] = get_bar(value[AIR2], 0);
 		bp[3] = get_bar(value[LF_OIL], 1);
 		bp[4] = get_bar(value[RF_OIL], 1);
-		bp[5] = get_bar(value[LB_OIL], 1);
-		bp[6] = get_bar(value[RB_OIL], 1);
+		bp[5] = get_bar(value[LB_OIL], 2);
+		bp[6] = get_bar(value[RB_OIL], 2);
+		Bplosefun();
 #ifndef EBS_TEST
 //		Bplosefun();
 #endif
