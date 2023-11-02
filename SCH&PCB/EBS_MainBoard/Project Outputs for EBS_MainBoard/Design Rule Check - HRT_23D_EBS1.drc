@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
-PCB File : D:\HRT\23D_EBS\SCH&PCB\EBS_MainBoard\HRT_23D_EBS1.1.PcbDoc
-Date     : 2023/9/10
-Time     : 17:17:36
+PCB File : D:\HRT\HRT-UB\2023_EBS\SCH&PCB\EBS_MainBoard\HRT_23D_EBS1.1.PcbDoc
+Date     : 2023/10/22
+Time     : 19:50:10
 
 Processing Rule : Clearance Constraint (Gap=10mil) (InNamedPolygon('VCC_3V3_L01_P009')),(All)
 Rule Violations :0
