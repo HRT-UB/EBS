@@ -57,6 +57,9 @@ extern uint32_t adc1_ave_val[ADC1_CHANNEL_CNT];              // 计算多�?�
 extern uint16_t value[ADC1_CHANNEL_CNT];                     // 多�?�道的平均采样�?�的数组
 extern int air_temp[5];
 extern uint8_t emit;
+extern uint8_t config_id;
+extern uint32_t config_value;
+extern uint32_t init_code;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -73,6 +76,7 @@ extern uint8_t emit;
 #define CAN_0X402_SEND_CODE 2
 #define CAN_0X482_SEND_CODE 4
 #define CAN_0X005_SEND_CODE 8
+#define CAN_0X502_SEND_CODE 16
 
 #define TXS_Control_ON  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
 #define TXS_Control_OFF HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);

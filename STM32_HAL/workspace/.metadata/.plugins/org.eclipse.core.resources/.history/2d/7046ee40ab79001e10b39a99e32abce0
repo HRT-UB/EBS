@@ -1,0 +1,21 @@
+/*
+ * flash.h
+ *
+ *  Created on: 2023Äê11ÔÂ3ÈÕ
+ *      Author: ROG
+ */
+#ifndef __FLASH_H
+#define __FLASH_H
+
+#include "main.h"
+
+#define SN 			            0x08010000
+#define PN 			            0x08010010
+#define SOFTWARE_VERSION 		0x08010020
+#define HARDWARE_VERSION		0x08010030
+
+void WriteFlash(uint32_t Address);
+uint32_t ReadFlash(uint32_t Address);
+
+
+#endif

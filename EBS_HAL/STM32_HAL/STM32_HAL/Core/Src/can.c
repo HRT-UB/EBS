@@ -26,6 +26,8 @@
 #include "usart.h"
 #include "stdio.h"
 #include "config.h"
+#include "tim.h"
+#include "flash.h"
 CAN_s_Rx_Temp can_s_rx_temp;
 CAN_s_Tx_Temp can_s_tx_temp;
 /* USER CODE END 0 */
@@ -129,16 +131,25 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 void CAN_Filter_Init(void) {
 	CAN_FilterTypeDef filter1;
+//	filter1.FilterBank = 0;
+//	filter1.FilterMode = CAN_FILTERMODE_IDLIST;
+//	filter1.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+//	filter1.FilterActivation = CAN_FILTER_ENABLE;
+//	filter1.FilterScale = CAN_FILTERSCALE_32BIT;
+//	filter1.FilterIdHigh = 0x20; // 0x001
+//	filter1.FilterIdLow = 0x0000;
+//	filter1.FilterMaskIdHigh = 0x2AC0;
+//	filter1.FilterMaskIdLow = 0x0000;
+
 	filter1.FilterBank = 0;
 	filter1.FilterMode = CAN_FILTERMODE_IDLIST;
 	filter1.FilterFIFOAssignment = CAN_FILTER_FIFO0;
 	filter1.FilterActivation = CAN_FILTER_ENABLE;
-	filter1.FilterScale = CAN_FILTERSCALE_32BIT;
-	filter1.FilterIdHigh = 0x20; // 0x001
-	filter1.FilterIdLow = 0x0000;
+	filter1.FilterScale = CAN_FILTERSCALE_16BIT;
+	filter1.FilterIdHigh = 0x2AC0; // 0x156
+	filter1.FilterIdLow = 0x00A0;
 	filter1.FilterMaskIdHigh = 0x2AC0;
-	filter1.FilterMaskIdLow = 0x0000;
-
+	filter1.FilterMaskIdLow = 0x00A0;
 	if (HAL_CAN_ConfigFilter(&hcan, &filter1) != HAL_OK)
 		Error_Handler();
 }
@@ -190,9 +201,38 @@ void CAN_Send_Msg(uint32_t a_StdId, uint32_t a_ExtId, uint8_t len) {
 		can_s_tx_temp.can_tx_arry[3] = (bp[2] & 0xFF00) >> 8;
 
 		break;
-	case 0x005:
-		can_s_tx_temp.can_tx_arry[0] =emit;
-
+	case 0x502: // 参数配置回复
+		can_s_tx_temp.can_tx_arry[0] = config_id;
+		switch(config_id) {
+		case _oa_ratio_id:
+			config_value = _oa_ratio;
+			break;
+		case _release_max_oil_id:
+			config_value = _release_max_oil;
+			break;
+		case _max_air_id:
+			config_value = _max_air;
+			break;
+		case _min_air_id:
+			config_value = _min_air;
+			break;
+		case _lose_oil_id:
+			config_value = _lose_oil;
+			break;
+		case _error_max_cnt_id:
+			config_value = _error_max_cnt;
+			break;
+		case _front_air_id:
+			config_value = _front_air;
+			break;
+		case _back_air_id:
+			config_value = _back_air;
+			break;
+		}
+		can_s_tx_temp.can_tx_arry[4] = config_value & 0xFF;
+		can_s_tx_temp.can_tx_arry[5] = (config_value >> 8) & 0xFF;
+		can_s_tx_temp.can_tx_arry[6] = (config_value >> 16) & 0xFF;
+		can_s_tx_temp.can_tx_arry[7] = (config_value >> 24) & 0xFF;
 		break;
 	}
 	//u3_printf("123132\r\n");
@@ -213,8 +253,46 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcanx) {
 				//u3_printf("AS_state:%d\r\n", new_state);
 				if(new_state == AS_Emergency ){
 					emit=1;
-
 				}
+			}
+		}
+		else if (can_s_rx_temp.can_rx_temp.StdId == 0x005) {
+			config_value = (can_s_rx_temp.can_rx_arry[4]) | (can_s_rx_temp.can_rx_arry[5] << 8) |
+					(can_s_rx_temp.can_rx_arry[6] << 16) | (can_s_rx_temp.can_rx_arry[7] << 24);
+			config_id = can_s_rx_temp.can_rx_arry[0];
+
+			if (can_s_rx_temp.can_rx_arry[1] == 0x00) { // 0x00是配置模式
+				code_flag |= CAN_0X502_SEND_CODE;
+				switch(config_id) {
+				case _oa_ratio_id:
+					_oa_ratio = config_value;
+					break;
+				case _release_max_oil_id:
+					_release_max_oil = config_value;
+					break;
+				case _max_air_id:
+					_max_air = config_value;
+					break;
+				case _min_air_id:
+					_min_air = config_value;
+					break;
+				case _lose_oil_id:
+					_lose_oil = config_value;
+					break;
+				case _error_max_cnt_id:
+					_error_max_cnt = config_value;
+					break;
+				case _front_air_id:
+					_front_air = config_value;
+					break;
+				case _back_air_id:
+					_back_air = config_value;
+					break;
+				}
+				WriteFlash();
+			}
+			else if (can_s_rx_temp.can_rx_arry[1] == 0x01){ // 0x01是查询模式
+				code_flag |= CAN_0X502_SEND_CODE;
 			}
 		}
 		//HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);

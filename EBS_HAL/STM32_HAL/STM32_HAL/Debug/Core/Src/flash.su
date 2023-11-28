@@ -1,0 +1,3 @@
+../Core/Src/flash.c:15:6:WriteFlash	104	static
+../Core/Src/flash.c:103:6:ReadFlash	4	static
+../Core/Src/flash.c:124:10:getFlashInitCode	4	static

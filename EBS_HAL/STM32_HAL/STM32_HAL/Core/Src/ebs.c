@@ -77,38 +77,38 @@ void EBS_FSM() {
             }
             else if (lv_air_check_flag == 1) {
             	uint8_t flag1 = 1, flag2 = 1;
-#ifdef FRONT_AIR
-            	if (bp[1] < _min_air) {
-            		flag1 = 0;
+            	if (_front_air) {
+					if (bp[1] < _min_air) {
+						flag1 = 0;
+					}
             	}
-#endif
-#ifdef BACK_AIR
-            	if (bp[2] < _min_air) {
-            		flag2 = 0;
-            	}
-#endif
+				if (_back_air) {
+					if (bp[2] < _min_air) {
+						flag2 = 0;
+					}
+				}
             	if (flag1 && flag2 && air_time > 5) {
             		lv_air_check_flag = 2;
             	}
             }
             else if (lv_air_check_flag == 2) {
                 air_time_flag = air_time = 0;
-#ifdef FRONT_AIR
-                if (bp[1] < _min_air || bp[1] > _max_air || MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) {
-                	EBS_error = 1;
-                	if (bp[1] < _min_air) air1_insufficient = 1;
-                	if (bp[1] > _max_air) air1_overpressure = 1;
-                	if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
+                if (_front_air) {
+					if (bp[1] < _min_air || bp[1] > _max_air || MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) {
+						EBS_error = 1;
+						if (bp[1] < _min_air) air1_insufficient = 1;
+						if (bp[1] > _max_air) air1_overpressure = 1;
+						if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
+					}
                 }
-#endif
-#ifdef BACK_AIR
-                if (bp[2] < _min_air || bp[2] > _max_air || MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) {
-                	EBS_error = 1;
-                	if (bp[2] < _min_air) air2_insufficient = 1;
-                	if (bp[2] > _max_air) air2_overpressure = 1;
-                	if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
+                if (_back_air) {
+					if (bp[2] < _min_air || bp[2] > _max_air || MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) {
+						EBS_error = 1;
+						if (bp[2] < _min_air) air2_insufficient = 1;
+						if (bp[2] > _max_air) air2_overpressure = 1;
+						if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
+					}
                 }
-#endif
             }
         }
         if (air_time > 10 && air_time_flag) { // 5s
@@ -116,16 +116,16 @@ void EBS_FSM() {
             lv_air_check_flag = 2;
             EBS_error = 1;
             timeout = 1;
-#ifdef FRONT_AIR
-        	if (bp[1] < _min_air) air1_insufficient = 1;
-        	if (bp[1] > _max_air) air1_overpressure = 1;
-        	if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
-#endif
-#ifdef BACK_AIR
-        	if (bp[2] < _min_air) air2_insufficient = 1;
-        	if (bp[2] > _max_air) air2_overpressure = 1;
-        	if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
-#endif
+            if (_front_air) {
+				if (bp[1] < _min_air) air1_insufficient = 1;
+				if (bp[1] > _max_air) air1_overpressure = 1;
+				if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
+            }
+            if (_back_air) {
+				if (bp[2] < _min_air) air2_insufficient = 1;
+				if (bp[2] > _max_air) air2_overpressure = 1;
+				if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
+            }
         }
         if(new_state == Manual_HV) {
         	error_state_cnt = 0;
@@ -195,66 +195,68 @@ void EBS_FSM() {
                 air_time = 0;
             }
             else if (as_hv_air_check_flag == 1) {
-#ifdef FRONT_AIR
-            	if (air_time > 20 && air_time_flag) {
-            		if (bp[1] >= _min_air && MAX(bp[5], bp[6]) < _release_max_oil && MIN(bp[3], bp[4]) >= bp[1] * _oa_ratio) {
-                		air_time = 0;
-                		air_time_flag = 1;
-                		as_hv_air_check_flag = 2;
-                		brake2_OFF; brake1_ON;
-            		}
+            	if (_front_air) {
+					if (air_time > 20 && air_time_flag) {
+						if (bp[1] >= _min_air && MAX(bp[5], bp[6]) < _release_max_oil && MIN(bp[3], bp[4]) >= bp[1] * _oa_ratio) {
+							air_time = 0;
+							air_time_flag = 1;
+							as_hv_air_check_flag = 2;
+							brake2_OFF; brake1_ON;
+						}
+					}
+					if (air_time > 50) {
+					   air_time = air_time_flag = 0;
+					   ebs_emergency();
+					   EBS_error = 1;
+					   timeout = 1;
+					   if (bp[1] < _min_air) air1_insufficient = 1;
+					   if (MAX(bp[5], bp[6]) >= _release_max_oil) air2_path_failure = 1;
+					   if (MIN(bp[3], bp[4]) < bp[1] * _oa_ratio) air1_path_failure = 1;
+					}
             	}
-        		if (air_time > 50) {
-                   air_time = air_time_flag = 0;
-                   ebs_emergency();
-                   EBS_error = 1;
-                   timeout = 1;
-                   if (bp[1] < _min_air) air1_insufficient = 1;
-                   if (MAX(bp[5], bp[6]) >= _release_max_oil) air2_path_failure = 1;
-                   if (MIN(bp[3], bp[4]) < bp[1] * _oa_ratio) air1_path_failure = 1;
-        		}
-#else
-            	as_hv_air_check_flag = 2;
-            	brake2_OFF; brake1_ON;
-#endif
+            	else {
+					as_hv_air_check_flag = 2;
+					brake2_OFF; brake1_ON;
+            	}
             }
             else if (as_hv_air_check_flag == 2) {
-#ifdef BACK_AIR
-            	if (air_time > 10 && air_time_flag) {
-            		if (bp[2] >= _min_air && MAX(bp[3], bp[4]) < _release_max_oil && MIN(bp[5], bp[6]) >= bp[2] * _oa_ratio) {
-                		air_time = 0;
-                		air_time_flag = 1;
-                		as_hv_air_check_flag = 3;
-                		brake1_OFF; brake2_OFF;
-            		}
+            	if (_back_air) {
+					if (air_time > 10 && air_time_flag) {
+						if (bp[2] >= _min_air && MAX(bp[3], bp[4]) < _release_max_oil && MIN(bp[5], bp[6]) >= bp[2] * _oa_ratio) {
+							air_time = 0;
+							air_time_flag = 1;
+							as_hv_air_check_flag = 3;
+							brake1_OFF; brake2_OFF;
+						}
+					}
+					if (air_time > 50) {
+					   air_time = air_time_flag = 0;
+					   ebs_emergency();
+					   EBS_error = 1;
+					   timeout = 1;
+					   if (bp[2] < _min_air) air2_insufficient = 1;
+					   if (MAX(bp[3], bp[4]) >= _release_max_oil) air1_path_failure = 1;
+					   if (MIN(bp[5], bp[6]) < bp[2] * _oa_ratio) air2_path_failure = 1;
+					}
             	}
-        		if (air_time > 50) {
-                   air_time = air_time_flag = 0;
-                   ebs_emergency();
-                   EBS_error = 1;
-                   timeout = 1;
-                   if (bp[2] < _min_air) air2_insufficient = 1;
-                   if (MAX(bp[3], bp[4]) >= _release_max_oil) air1_path_failure = 1;
-                   if (MIN(bp[5], bp[6]) < bp[2] * _oa_ratio) air2_path_failure = 1;
-        		}
-#else
-            	as_hv_air_check_flag = 3;
-            	brake1_OFF; brake2_OFF;
-#endif
+            	else {
+					as_hv_air_check_flag = 3;
+					brake1_OFF; brake2_OFF;
+            	}
             }
             else if (as_hv_air_check_flag == 3) {
             	if (air_time > 10 && air_time_flag) {
             		uint8_t flag1 = 1, flag2 = 1;
-#ifdef FRONT_AIR
-            		if (MIN(bp[3], bp[4]) < bp[1] * _oa_ratio) {
-            			flag1 = 0;
+            		if (_front_air) {
+						if (MIN(bp[3], bp[4]) < bp[1] * _oa_ratio) {
+							flag1 = 0;
+						}
             		}
-#endif
-#ifdef BACK_AIR
-            		if (MIN(bp[5], bp[6]) < bp[2] * _oa_ratio) {
-            			flag2 = 0;
+            		if (_back_air) {
+						if (MIN(bp[5], bp[6]) < bp[2] * _oa_ratio) {
+							flag2 = 0;
+						}
             		}
-#endif
             		if (flag1 && flag2) {
                 		air_time = 0;
                 		air_time_flag = 0;
@@ -266,37 +268,36 @@ void EBS_FSM() {
                     ebs_emergency();
                     EBS_error = 1;
 
-#ifdef FRONT_AIR
-                	if (bp[1] < _min_air) air1_insufficient = 1;
-                    if (MAX(bp[3], bp[4]) < bp[1] * _oa_ratio) air1_path_failure = 1;
-#endif
-#ifdef BACK_AIR
-                	if (bp[2] < _min_air) air2_insufficient = 1;
-                    if (MAX(bp[5], bp[6]) < bp[2] * _oa_ratio) air2_path_failure = 1;
-#endif
+                    if (_front_air) {
+						if (bp[1] < _min_air) air1_insufficient = 1;
+						if (MAX(bp[3], bp[4]) < bp[1] * _oa_ratio) air1_path_failure = 1;
+                    }
+                    if (_back_air) {
+						if (bp[2] < _min_air) air2_insufficient = 1;
+						if (MAX(bp[5], bp[6]) < bp[2] * _oa_ratio) air2_path_failure = 1;
+                    }
                 }
             }
             else if (as_hv_air_check_flag == 4) {
             	ebs_ready = 1;
-#ifdef FRONT_AIR
-            	if (bp[1] < _min_air || bp[1] > _max_air || MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) {
-					ebs_emergency();
-					EBS_error = 1;
-		        	if (bp[1] < _min_air) air1_insufficient = 1;
-		        	if (bp[1] > _max_air) air1_overpressure = 1;
-		        	if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
-
+            	if (_front_air) {
+					if (bp[1] < _min_air || bp[1] > _max_air || MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) {
+						ebs_emergency();
+						EBS_error = 1;
+						if (bp[1] < _min_air) air1_insufficient = 1;
+						if (bp[1] > _max_air) air1_overpressure = 1;
+						if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
+					}
             	}
-#endif
-#ifdef BACK_AIR
-            	if (bp[2] < _min_air || bp[2] > _max_air || MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) {
-					ebs_emergency();
-					EBS_error = 1;
-		        	if (bp[2] < _min_air) air2_insufficient = 1;
-		        	if (bp[2] > _max_air) air2_overpressure = 1;
-		        	if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
+            	if (_back_air) {
+					if (bp[2] < _min_air || bp[2] > _max_air || MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) {
+						ebs_emergency();
+						EBS_error = 1;
+						if (bp[2] < _min_air) air2_insufficient = 1;
+						if (bp[2] > _max_air) air2_overpressure = 1;
+						if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
+					}
             	}
-#endif
             }
         }
         if (new_state == AS_Emergency) {
@@ -325,24 +326,24 @@ void EBS_FSM() {
     case AS_Ready:
         if (adc_f) {
             adc_f = 0;
-#ifdef FRONT_AIR
-        	if (bp[1] < _min_air || bp[1] > _max_air || MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) {
-				ebs_emergency();
-				EBS_error = 1;
-	        	if (bp[1] < _min_air) air1_insufficient = 1;
-	        	if (bp[1] > _max_air) air1_overpressure = 1;
-	        	if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
-        	}
-#endif
-#ifdef BACK_AIR
-        	if (bp[2] < _min_air || bp[2] > _max_air || MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) {
-				ebs_emergency();
-				EBS_error = 1;
-	        	if (bp[2] < _min_air) air2_insufficient = 1;
-	        	if (bp[2] > _max_air) air2_overpressure = 1;
-	        	if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
-        	}
-#endif
+            if (_front_air) {
+				if (bp[1] < _min_air || bp[1] > _max_air || MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) {
+					ebs_emergency();
+					EBS_error = 1;
+					if (bp[1] < _min_air) air1_insufficient = 1;
+					if (bp[1] > _max_air) air1_overpressure = 1;
+					if (MIN(bp[3], bp[4]) < _oa_ratio * bp[1]) air1_path_failure = 1;
+				}
+            }
+            if (_back_air) {
+				if (bp[2] < _min_air || bp[2] > _max_air || MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) {
+					ebs_emergency();
+					EBS_error = 1;
+					if (bp[2] < _min_air) air2_insufficient = 1;
+					if (bp[2] > _max_air) air2_overpressure = 1;
+					if (MIN(bp[5], bp[6]) < _oa_ratio * bp[2]) air2_path_failure = 1;
+				}
+            }
         }
         if (new_state == AS_Emergency) {
         	error_state_cnt = 0;
@@ -374,16 +375,16 @@ void EBS_FSM() {
             if (as_driving_air_check_flag == 0) {
             	if (air_time > 4) {
             		uint8_t flag1 = 1, flag2 = 1;
-#ifdef FRONT_AIR
-            		if (bp[1] < _min_air || bp[1] > _max_air) {
-            			flag1 = 0;
+            		if (_front_air) {
+						if (bp[1] < _min_air || bp[1] > _max_air) {
+							flag1 = 0;
+						}
             		}
-#endif
-#ifdef BACK_AIR
-            		if (bp[2] < _min_air || bp[2] > _max_air) {
-            			flag2 = 0;
+            		if (_back_air) {
+						if (bp[2] < _min_air || bp[2] > _max_air) {
+							flag2 = 0;
+						}
             		}
-#endif
             		if (flag1 && flag2) {
             			as_driving_air_check_flag = 1;
                 		air_time = air_time_flag = 0;
@@ -394,34 +395,34 @@ void EBS_FSM() {
                     air_time = air_time_flag = 0;
                     ebs_emergency();
                     EBS_error = 1;
-#ifdef FRONT_AIR
+                    if (_front_air) {
     	        	if (bp[1] < _min_air) air1_insufficient = 1;
     	        	if (bp[1] > _max_air) air1_overpressure = 1;
-#endif
-#ifdef BACK_AIR
-    	        	if (bp[2] < _min_air) air2_insufficient = 1;
-    	        	if (bp[2] > _max_air) air2_overpressure = 1;
-#endif
+                    }
+                    if (_back_air) {
+						if (bp[2] < _min_air) air2_insufficient = 1;
+						if (bp[2] > _max_air) air2_overpressure = 1;
+                    }
                 }
             }
             else if (as_driving_air_check_flag == 1) {
-#ifdef FRONT_AIR
-            	if (bp[1] < _min_air || bp[1] > _max_air) {
-                    ebs_emergency();
-                    EBS_error = 1;
-    	        	if (bp[1] < _min_air) air1_insufficient = 1;
-    	        	if (bp[1] > _max_air) air1_overpressure = 1;
+            	if (_front_air) {
+					if (bp[1] < _min_air || bp[1] > _max_air) {
+						ebs_emergency();
+						EBS_error = 1;
+						if (bp[1] < _min_air) air1_insufficient = 1;
+						if (bp[1] > _max_air) air1_overpressure = 1;
 
+					}
             	}
-#endif
-#ifdef BACK_AIR
-            	if (bp[2] < _min_air || bp[2] > _max_air) {
-                    ebs_emergency();
-                    EBS_error = 1;
-    	        	if (bp[2] < _min_air) air2_insufficient = 1;
-    	           	if (bp[2] > _max_air) air2_overpressure = 1;
-            	}
-#endif
+            	if (_back_air) {
+					if (bp[2] < _min_air || bp[2] > _max_air) {
+						ebs_emergency();
+						EBS_error = 1;
+						if (bp[2] < _min_air) air2_insufficient = 1;
+						if (bp[2] > _max_air) air2_overpressure = 1;
+					}
+				}
             }
         }
         if (new_state == AS_Finished || new_state == AS_Emergency) {

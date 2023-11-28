@@ -1,0 +1,109 @@
+/*
+ * flash.c
+ *
+ *  Created on: 2023年11月3日
+ *      Author: ROG
+ */
+
+
+#include "flash.h"
+
+uint32_t startAddress;
+uint32_t endAddress;
+uint32_t Data = 0x12345678;
+//FLASH写入数据
+void WriteFlash(uint32_t Address)
+{
+    uint16_t i = 0;
+    uint32_t Data;
+    startAddress = SN;
+    HAL_FLASH_Unlock();
+    FLASH_EraseInitTypeDef f;
+    f.TypeErase = FLASH_TYPEERASE_PAGES;
+    f.PageAddress = Address;
+    f.NbPages = 1;
+    uint32_t PageError = 0;
+    HAL_FLASHEx_Erase(&f, &PageError);
+    //在startAddress~endAddress写入4组0x12345678
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, init_code) == HAL_OK) // 写入flash初始码
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _oa_ratio) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _release_max_oil) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _max_air) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _min_air) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _lose_oil) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _error_max_cnt) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _front_air) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+	if(HAL_FLASH_Program(TYPEPROGRAM_WORD, startAddress, _back_air) == HAL_OK)
+	{
+		startAddress +=4;
+	}
+	else {
+		HAL_FLASH_Lock();
+		return;
+	}
+    //4、锁住FLASH
+	HAL_FLASH_Lock();
+}
+
+//FLASH读取数据
+uint32_t ReadFlash(uint32_t Address)
+{
+	uint32_t temp = *(__IO uint32_t*)(Address);
+	return temp;
+}

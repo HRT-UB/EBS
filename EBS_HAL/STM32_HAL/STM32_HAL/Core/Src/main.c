@@ -30,6 +30,8 @@
 #include "ebs.h"
 #include "stdio.h"
 #include "usart.h"
+#include "flash.h"
+#include "config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,6 +66,9 @@ uint32_t OIL_BRAKE_MIN = 0;
 uint32_t OIL_Release_Max = 0;
 int air_temp[5]; //1231
 uint8_t emit = 0;
+uint8_t config_id = 0;
+uint32_t config_value = 0;
+uint32_t init_code = 0x002;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,17 +118,35 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   GPIO_Set_Init();
+//  EBS_error_OFF;
+//  while (1){}
   HAL_ADCEx_Calibration_Start(&hadc1);//初始校准
 
   CAN_Filter_Init();
-  if (HAL_CAN_Start(&hcan) != HAL_OK) Error_Handler();
-  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) Error_Handler();
+  if (HAL_CAN_Start(&hcan) != HAL_OK) {
+	  u3_printf("111\r\n");
+	  Error_Handler();
+  }
+  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+	  u3_printf("222\r\n");
+	  Error_Handler();
+  }
   HAL_Delay(500);
-  if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) Error_Handler();
+  if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
+	  u3_printf("333\r\n");
+	  Error_Handler();
+  }
 #ifndef EBS_TEST
   circuit_check();
 #endif
+  if (getFlashInitCode() == 0x002) {
+	  ReadFlash();
+  }
+  else {
+	  WriteFlash();
+  }
   u3_printf("MAINWIHLE START\r\n");
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,10 +168,10 @@ int main(void)
 		  CAN_Send_Msg(0x402, 0, 8); // 100 0000 0010
 		  code_flag &= ~CAN_0X402_SEND_CODE;
 	  }
-	  if (code_flag& CAN_0X005_SEND_CODE) { // 20hz
-	  		  CAN_Send_Msg(0x5, 0, 1); // 100 0000 0010
-	  		  code_flag &= ~CAN_0X005_SEND_CODE;
-	  	  }
+	  if (code_flag& CAN_0X502_SEND_CODE) {
+	  		  CAN_Send_Msg(0x502, 0, 8); // 101 0000 0010
+	  		  code_flag &= ~CAN_0X502_SEND_CODE;
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
